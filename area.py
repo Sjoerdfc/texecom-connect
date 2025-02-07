@@ -38,4 +38,5 @@ class Area:
             "armed",
             "part armed",
             "in alarm",
+            "armed home",
         ][self.state]
