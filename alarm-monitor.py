@@ -109,6 +109,8 @@ class TexecomMqtt:
             "state_topic": statetopic,
             "command_topic": commandtopic,
             "unique_id": ".".join([panelType, "area", name]),
+            "code_arm_required": "false",
+            "code_disarm_required ": "false",
             "device": {
                 "name": "Texecom " + panelType + " " + str(numberOfZones),
                 "identifiers": "123456789",  # TODO panel serial number?
