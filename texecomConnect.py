@@ -311,7 +311,9 @@ class TexecomConnect(TexecomDefines):
             2000 + datetimeresp[2],
             datetimeresp[1],
             datetimeresp[0],
-            (*datetimeresp[3:]),
+            datetimeresp[3],
+            datetimeresp[4],
+            datetimeresp[5]
         )
         seconds = int((paneltime - datetime.datetime.now()).total_seconds())
         if seconds > 0:
@@ -414,7 +416,7 @@ class TexecomConnect(TexecomDefines):
         details = self.sendcommand(self.CMD_GETZONECHANGES, None)
         if details is None:
             return None
-        if len(details) == self.zoneBitmapSize + 2:
+        if len(details) == self.zoneBitmapSize:
             changedZonesBitmap = details
             return changedZonesBitmap
         else:
@@ -955,13 +957,16 @@ class TexecomConnect(TexecomDefines):
                 self.closesocket()
                 return None
             if len(header) < self.LENGTH_HEADER:
-                self.log(
-                    "Header received from panel is too short, only {:d} bytes, ignoring - contents:".format(
-                        len(header)
+                # fix if data isn't in 1 packet
+                #header += self.s.recv(self.LENGTH_HEADER - len(header))
+                if len(header) < self.LENGTH_HEADER:
+                    self.log(
+                        "Header received from panel is too short, only {:d} bytes, ignoring - contents:".format(
+                            len(header)
+                        )
                     )
-                )
-                hexdump.hexdump(header)
-                continue
+                    hexdump.hexdump(header)
+                    continue
             msg_start, msg_type, msg_length, msg_sequence = (
                 header[0:1],
                 header[1:2],
@@ -973,6 +978,19 @@ class TexecomConnect(TexecomDefines):
                 hexdump.hexdump(header)
                 return None
             expected_len = msg_length - self.LENGTH_HEADER
+            #received_len = 0
+            #payload = bytearray()
+            #while received_len < expected_len:
+            #    curr_payload = self.s.recv(expected_len)
+            #    if self.print_network_traffic:
+            #        self.log("Received message payload:")
+            #        hexdump.hexdump(curr_payload)
+            #    payload += curr_payload
+            #    received_len += len(curr_payload)
+            #    if (len(curr_payload) == 0):
+            #        self.log("no more data")
+            #        break
+
             payload = self.s.recv(expected_len)
             if self.print_network_traffic:
                 self.log("Received message payload:")

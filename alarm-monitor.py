@@ -142,6 +142,7 @@ class TexecomMqtt:
             "armed_away",
             "armed_night",
             "triggered",
+            "armed_home"
         ][area.state]
         topic = (
             topic_root
