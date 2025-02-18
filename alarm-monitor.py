@@ -33,7 +33,7 @@ class TexecomMqtt:
     log_mqtt_traffic = False
 
     @staticmethod
-    def on_connect(client, userdata, flags, rc):
+    def on_connect(client, userdata, flags, reason_code, properties):
         if len(topic_subs[0]) > 0:
             client.subscribe(topic_root + "/alarm_control_panel/+/command/#")
 
@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
     sys.stdout = Unbuffered(sys.stdout)
 
-    client = paho.Client()
+    client = paho.Client(paho.CallbackAPIVersion.VERSION2)
     client.username_pw_set(broker_user, broker_pass)
     client.on_message = TexecomMqtt.on_message
     client.on_connect = TexecomMqtt.on_connect
