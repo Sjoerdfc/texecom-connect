@@ -1,0 +1,15 @@
+services:
+  texecom-connect:
+    container_name: texecom-connect
+    image: sjoerdfc/texecom-connect
+    restart: unless-stopped
+    environment:
+      - TEXHOST=10.0.0.20
+      - TEXTPORT=10001
+      - UDLPASSWORD=1234
+      - BROKER_URL=10.0.0.10
+      - BROKER_USER=user
+      - BROKER_PASS=pass
+      - MQTT_ROOT_TOPIC=homeassistant
+      - MQTT_AREAS=all,ground_floor,upstairs,outside,shed
+      - MQTT_AREAMAPS=0F000000000000,01000000000000,02000000000000,04000000000000,08000000000000
