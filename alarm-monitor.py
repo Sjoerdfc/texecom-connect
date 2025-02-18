@@ -30,7 +30,7 @@ import paho.mqtt.client as paho
 
 class TexecomMqtt:
 
-    log_mqtt_traffic = True
+    log_mqtt_traffic = False
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
