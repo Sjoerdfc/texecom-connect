@@ -42,8 +42,8 @@ class TexecomConnect(TexecomDefines):
         self.crc8_func = crcmod.mkCrcFun(poly=0x185, rev=False, initCrc=0xFF)
         self.nextseq = 0
 
-        self.print_network_traffic = True
-        self.log_verbose = True
+        self.print_network_traffic = False
+        self.log_verbose = False
         self.alive_heartbeat_secs = 300
         self.time_last_heartbeat = 0
         self.last_command_time = 0
