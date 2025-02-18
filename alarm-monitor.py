@@ -30,7 +30,7 @@ import paho.mqtt.client as paho
 
 class TexecomMqtt:
 
-    log_mqtt_traffic = False
+    log_mqtt_traffic = True
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
@@ -57,10 +57,14 @@ class TexecomMqtt:
                     if len(topic_areamaps) >= subtopicIdx:
                         areamap = topic_areamaps[subtopicIdx]
                         area_bitmap = bytes.fromhex(areamap)
-                        if message.payload.decode("utf-8") == "ARM_AWAY":
+                        if message.payload.decode("utf-8") == "ARM_AWAY": # The Home Assistant command payload text
                             tc.requestArmAreas(area_bitmap)
-                        elif message.payload.decode("utf-8") == "ARM_HOME":
-                            tc.requestPartArmAreas(area_bitmap)
+                        elif message.payload.decode("utf-8") == "ARM_NIGHT": # part arm 1 (rearrange the payload texts to change the part arm 1/2/3 types in Home Assistant)
+                            tc.requestPartArm1Areas(area_bitmap)
+                        elif message.payload.decode("utf-8") == "ARM_HOME": # part arm 2
+                            tc.requestPartArm2Areas(area_bitmap)
+                        elif message.payload.decode("utf-8") == "ARM_VACATION": # part arm 3
+                            tc.requestPartArm3Areas(area_bitmap)
                         elif message.payload.decode("utf-8") == "DISARM":
                             tc.requestDisArmAreas(area_bitmap)
                         elif message.payload.decode("utf-8") == "reset":
@@ -138,13 +142,15 @@ class TexecomMqtt:
     @staticmethod
     def area_status_event(area):
         area_state_str = [
-            "disarmed",
-            "pending",
-            "pending",
+            "disarmed", # the Home Assistant states for a MQTT Alarm control panel. These must match (in order) the actual states in area.py
+            "arming", # in exit
+            "disarming", # in entry
             "armed_away",
-            "armed_night",
+            "arming", # part arming
             "triggered",
-            "armed_home"
+            "armed_night", # part armed 1
+            "pending", # unknown state, see area.py
+            "armed_vacation" # part armed 3
         ][area.state]
         topic = (
             topic_root

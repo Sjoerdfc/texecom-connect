@@ -72,6 +72,8 @@ class TexecomDefines:
     AREA_STATE_ARMED = 3
     AREA_STATE_PARTARMED = 4
     AREA_STATE_INALARM = 5
+    AREA_STATE_PARTARMED1 = 6
+    AREA_STATE_PARTARMED2 = 8
 
     zone_types = {}
     zone_types[0] = "Unused"

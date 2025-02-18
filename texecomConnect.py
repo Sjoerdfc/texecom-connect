@@ -42,8 +42,8 @@ class TexecomConnect(TexecomDefines):
         self.crc8_func = crcmod.mkCrcFun(poly=0x185, rev=False, initCrc=0xFF)
         self.nextseq = 0
 
-        self.print_network_traffic = False
-        self.log_verbose = False
+        self.print_network_traffic = True
+        self.log_verbose = True
         self.alive_heartbeat_secs = 300
         self.time_last_heartbeat = 0
         self.last_command_time = 0
@@ -665,9 +665,17 @@ class TexecomConnect(TexecomDefines):
         """Queue arm areas request. Request is queued for processing by main thread"""
         self.arm_disarm_reset_queue.append((self.CMD_ARMAREAS, self.ARMING_TYPE_FULL, area_bitmap))
 
-    def requestPartArmAreas(self, area_bitmap):
+    def requestPartArm1Areas(self, area_bitmap):
         """Queue part arm areas request. Request is queued for processing by main thread"""
         self.arm_disarm_reset_queue.append((self.CMD_ARMAREAS, self.ARMING_TYPE_PART1, area_bitmap))
+
+    def requestPartArm2Areas(self, area_bitmap):
+        """Queue part arm areas request. Request is queued for processing by main thread"""
+        self.arm_disarm_reset_queue.append((self.CMD_ARMAREAS, self.ARMING_TYPE_PART2, area_bitmap))
+
+    def requestPartArm3Areas(self, area_bitmap):
+        """Queue part arm areas request. Request is queued for processing by main thread"""
+        self.arm_disarm_reset_queue.append((self.CMD_ARMAREAS, self.ARMING_TYPE_PART3, area_bitmap))
 
     def requestDisArmAreas(self, area_bitmap):
         """Queue disarm areas request. Request is queued for processing by main thread"""
@@ -677,16 +685,18 @@ class TexecomConnect(TexecomDefines):
         """Queue reset areas request. Request is queued for processing by main thread"""
         self.arm_disarm_reset_queue.append((self.CMD_RESETAREAS, None, area_bitmap))
 
-    def set_area_state(self, area, area_state):
-        area.state = area_state
-        area.state_text = [
-            "disarmed",
-            "in exit",
-            "in entry",
-            "armed",
-            "part armed",
-            "in alarm",
-        ][area.state]
+# this does not seem to be used anywhere
+#    def set_area_state(self, area, area_state):
+#        area.state = area_state
+#        area.state_text = [
+#            "disarmed",
+#            "in exit",
+#            "in entry",
+#            "armed",
+#            "part armed",
+#            "in alarm",
+#            "part armed 1",
+#        ][area.state]
 
     def handle_event_message(self, payload):
         msg_type, payload = payload[0:1], payload[1:]
