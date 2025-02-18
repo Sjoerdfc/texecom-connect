@@ -86,6 +86,7 @@ class TexecomMqtt:
             "name": name,
             "device_class": HAZoneType,
             "state_topic": statetopic,
+            "availability_topic": topic_root + "/alarm_control_panel/availability",
             "payload_on": "True",
             "payload_off": "False",
             "unique_id": ".".join([panelType, name]),
@@ -111,6 +112,7 @@ class TexecomMqtt:
         message = {
             "name": name,
             "state_topic": statetopic,
+            "availability_topic": topic_root + "/alarm_control_panel/availability",
             "command_topic": commandtopic,
             "unique_id": ".".join([panelType, "area", name]),
             "code_arm_required": "false",
@@ -165,7 +167,7 @@ class TexecomMqtt:
     @staticmethod
     def alive_event():
         available = "online"
-        topic = topic_root + "/alarm_control_panel/state"
+        topic = topic_root + "/alarm_control_panel/availability"
         if TexecomMqtt.log_mqtt_traffic:
             print("MQTT Update %s: %s" % (topic, available))
         client.publish(topic, available, retain=True)
@@ -234,14 +236,15 @@ if __name__ == "__main__":
     client.username_pw_set(broker_user, broker_pass)
     client.on_message = TexecomMqtt.on_message
     client.on_connect = TexecomMqtt.on_connect
-    client.will_set(topic_root + "/alarm_control_panel/state", "offline")
+    client.will_set(topic_root + "/alarm_control_panel/availability", "offline")
     print("connecting to broker ", broker_url)
     client.connect(broker_url, broker_port)
     client.loop_start()
 
     tc = TexecomConnect(texhost, texport, udlpassword)
     tc.enable_output_events(False)
-    tc.on_alive_event(TexecomMqtt.alive_event)
+    #tc.on_alive_event(TexecomMqtt.alive_event)
+    tc.on_login_event(TexecomMqtt.alive_event)
     tc.on_area_event(TexecomMqtt.area_status_event)
     tc.on_zone_event(TexecomMqtt.zone_status_event)
     tc.on_area_details(TexecomMqtt.area_details_callback)

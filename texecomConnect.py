@@ -53,6 +53,7 @@ class TexecomConnect(TexecomDefines):
         self.panelType = None
         self.firmwareVersion = None
         self.alive_event_func = None
+        self.login_event_func = None
         self.area_event_func = None
         self.area_details_func = None
         self.zone_details_func = None
@@ -643,6 +644,9 @@ class TexecomConnect(TexecomDefines):
     def on_alive_event(self, alive_event_func):
         self.alive_event_func = alive_event_func
 
+    def on_login_event(self, login_event_func):
+        self.login_event_func = login_event_func
+
     def on_area_event(self, area_event_func):
         self.area_event_func = area_event_func
 
@@ -868,6 +872,10 @@ class TexecomConnect(TexecomDefines):
                 self.closesocket()
                 continue
             self.log("login successful")
+
+            if self.login_event_func is not None:
+                self.login_event_func()
+
             if not self.set_event_messages():
                 self.log("Set event messages failed, closing socket")
                 self.closesocket()
