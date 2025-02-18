@@ -20,12 +20,9 @@ You need to set a UDL password for your panel. If you don't have a UDL password 
 
 ## Using it
 
-You need python installed, including the crcmod ('sudo -s pip install crcmod' will install it if you don't have it). The module is written in python2 but I believe could be made compatible with python3 as well with some fairly easy changes.
-Update Jul2020 (charly Anderson): module is now at Python 3.8 level
+Install python and run alarm-monitor.py manually. The configuration options are in this file.
 
-clone this git repo, then edit alarm-monitor.py to have the correct IP address, port number and UDL password, then just run the script:
-
-`./alarm-monitor.py`
+Or use the docker-compose file, the image is on Docker Hub.
 
 ## License
 
