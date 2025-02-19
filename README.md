@@ -41,6 +41,12 @@ services:
       - BROKER_USER=user
       - BROKER_PASS=pass
       - MQTT_ROOT_TOPIC=homeassistant
+      # This is from the original author.
+      # The way I configured this, with only one zone, is set AREAS to 'zonename' (same name as in alarm system),
+      # and set AREAMAPS to 01000000000000 (for Area 1).
+      # So 0F000000000000 = all areas, 01000000000000 = area 1, 02000000000000 = area 2, etc.
+      # So if you have 1 area, you only need 01000000000000 in AREAMAPS, and set 1 name for it in AREAS. As far as I understand.
+      # This works fine for me in Home Assistant.
       - MQTT_AREAS=all,ground_floor,upstairs,outside,shed
       - MQTT_AREAMAPS=0F000000000000,01000000000000,02000000000000,04000000000000,08000000000000
       # What state Part Arm 1/2/3 should have in Home Assistant. Available states:
