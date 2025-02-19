@@ -59,11 +59,11 @@ class TexecomMqtt:
                         area_bitmap = bytes.fromhex(areamap)
                         if message.payload.decode("utf-8") == "ARM_AWAY": # The Home Assistant command payload text
                             tc.requestArmAreas(area_bitmap)
-                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_1", "ARM_NIGHT"): # part arm 1 = ARM_NIGHT
+                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_1", "ARM_NIGHT"): # part arm 1, default = ARM_NIGHT
                             tc.requestPartArm1Areas(area_bitmap)
-                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_2", "ARM_HOME"): # part arm 2 = ARM_HOME
+                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_2", "ARM_HOME"): # part arm 2, default = ARM_HOME
                             tc.requestPartArm2Areas(area_bitmap)
-                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_3", "ARM_VACATION"): # part arm 3 = ARM_VACATION
+                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_3", "ARM_VACATION"): # part arm 3, default = ARM_VACATION
                             tc.requestPartArm3Areas(area_bitmap)
                         elif message.payload.decode("utf-8") == "DISARM":
                             tc.requestDisArmAreas(area_bitmap)
@@ -146,10 +146,15 @@ class TexecomMqtt:
             "armed_away",
             "arming", # part arming
             "triggered",
-            "armed_night", # part armed 1
-            "pending", # unknown state, see area.py
-            "armed_vacation" # part armed 3
+            os.getenv("PART_ARM_1", "ARM_NIGHT"), # part armed 1
+            os.getenv("PART_ARM_2", "ARM_HOME"), # part armed 2
+            os.getenv("PART_ARM_3", "ARM_VACATION") # part armed 3
         ][area.state]
+
+        #replace the syntax for the part arm stings from the config with the correct syntax home assistant expects for the states
+        for old, new in (("ARM_NIGHT", "armed_night"), ("ARM_HOME", "armed_home"), ("ARM_VACATION", "armed_vacation"), ("ARM_CUSTOM_BYPASS", "armed_custom_bypass")):
+            area_state_str = area_state_str.replace(old, new)
+
         topic = (
             topic_root
             + "/alarm_control_panel/"

@@ -2,11 +2,14 @@
 
 ## Introduction
 
-This is a python module that implements decoding of the Texecom Connect protocol. 
+This is a python module that connects Texecom Alarm systems to Home Assistant with MQTT.
 
 Original work was done by Joseph Heenan, Charly Anderson, davidMbrooke, mpredfearn and lodesmets. I added small stuff to make it work how I want it with my Texecom Premier Elite 24 (fw V6.05.03LS1) and Home Assistant.
 
-I changed the Night Arm in Home Assistant to Part Arm 1, and Home Arm to Part Arm 2. Part Arm 3 seems to have the same status byte as 2, so that doesn't work yet.
+- Arming and disarming should work.
+- Part Arm 1, 2 and 3 should all work, and it can be configured what state they should be in Home Assistant in the docker compose config.
+- The alarm control panel and zones (binary sensors) should now become unavailable in Home Assistant when the software is not running/crashed/disconnected.
+- The device classes in Home Assistant can be configured for all zones in the docker compose config.
 
 ## Requirements
 

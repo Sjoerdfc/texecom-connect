@@ -36,9 +36,9 @@ class Area:
             "in exit",
             "in entry",
             "armed",
-            "part arming", # 04, this used to be part armed I think, but in my system it goes from 4 to 6 (partarm1) or 8 (partarm2/3)
+            "part arming", # 04, this used to be part armed I think, but in my system it goes from 4 to 6 (partarm1), 7 (partarm2) or 8 (partarm3)
             "in alarm", # 05
             "part armed 1", # 06
-            "dont know yet", # 07, never seen this state happen yet
-            "part armed 2/3", # 08 - when sending ARMING_TYPE_PART2 or ARMING_TYPE_PART3 commands the status byte I receive is 08
+            "part armed 2", # 07
+            "part armed 3", # 08
         ][self.state]
