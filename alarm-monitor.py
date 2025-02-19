@@ -59,11 +59,11 @@ class TexecomMqtt:
                         area_bitmap = bytes.fromhex(areamap)
                         if message.payload.decode("utf-8") == "ARM_AWAY": # The Home Assistant command payload text
                             tc.requestArmAreas(area_bitmap)
-                        elif message.payload.decode("utf-8") == "ARM_NIGHT": # part arm 1 (rearrange the payload texts to change the part arm 1/2/3 types in Home Assistant)
+                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_1", "ARM_NIGHT"): # part arm 1 = ARM_NIGHT
                             tc.requestPartArm1Areas(area_bitmap)
-                        elif message.payload.decode("utf-8") == "ARM_HOME": # part arm 2
+                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_2", "ARM_HOME"): # part arm 2 = ARM_HOME
                             tc.requestPartArm2Areas(area_bitmap)
-                        elif message.payload.decode("utf-8") == "ARM_VACATION": # part arm 3
+                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_3", "ARM_VACATION"): # part arm 3 = ARM_VACATION
                             tc.requestPartArm3Areas(area_bitmap)
                         elif message.payload.decode("utf-8") == "DISARM":
                             tc.requestDisArmAreas(area_bitmap)
@@ -72,18 +72,14 @@ class TexecomMqtt:
 
     @staticmethod
     def zone_details_callback(zone, panelType, numberOfZones):
-        if zone.zoneType == 1:
-            HAZoneType = "door"
-        elif zone.zoneType == 8:
-            HAZoneType = "safety"
-        else:
-            HAZoneType = "motion"
+        HAZoneType =  os.getenv("ZONE_" + str(zone.number) + "_CLASS" , "motion")
+
         name = str.lower((zone.text).replace(" ", "_"))
         topicbase = topic_root + "/binary_sensor/" + name
         configtopic = topicbase + "/config"
         statetopic = topicbase + "/state"
         message = {
-            "name": name,
+            "name": zone.text,
             "device_class": HAZoneType,
             "state_topic": statetopic,
             "availability_topic": topic_root + "/alarm_control_panel/availability",
@@ -110,7 +106,7 @@ class TexecomMqtt:
         statetopic = topicbase + "/state"
         commandtopic = topicbase + "/command"
         message = {
-            "name": name,
+            "name": area.text,
             "state_topic": statetopic,
             "availability_topic": topic_root + "/alarm_control_panel/availability",
             "command_topic": commandtopic,

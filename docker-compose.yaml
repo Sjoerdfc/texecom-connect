@@ -13,3 +13,13 @@ services:
       - MQTT_ROOT_TOPIC=homeassistant
       - MQTT_AREAS=all,ground_floor,upstairs,outside,shed
       - MQTT_AREAMAPS=0F000000000000,01000000000000,02000000000000,04000000000000,08000000000000
+      # What state Part Arm 1/2/3 should have in Home Assistant. Available states:
+      # ARM_HOME, ARM_NIGHT, ARM_VACATION, ARM_CUSTOM_BYPASS. (ARM_AWAY is used for Full Arm)
+      - PART_ARM_1=ARM_NIGHT
+      - PART_ARM_2=ARM_HOME
+      - PART_ARM_3=ARM_VACATION
+      # Set the device class in Home Assistant of all the zones
+      - ZONE_1_CLASS=door
+      - ZONE_2_CLASS=door
+      - ZONE_3_CLASS=motion
+      # etc..
