@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2018 Joseph Heenan
 # Updates Jul 2020 Charly Anderson
+# Updates 2025 Sjoerd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -856,7 +857,6 @@ class TexecomConnect(TexecomDefines):
                 self.log(
                     "Connection lost for over 60 seconds - calling send-message.sh"
                 )
-                os.system("./send-message.sh 'connection lost'")
                 notifiedConnectionLoss = True
             try:
                 self.connect()
@@ -910,7 +910,7 @@ class TexecomConnect(TexecomDefines):
     def connect(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.settimeout(self.CMD_TIMEOUT)
-        self.s.connect((self.host, self.port))
+        self.s.connect((self.host, int(self.port)))
         # if we send the login message to fast the panel ignores it; texecom
         # recommend 500ms, see:
         # http://texecom.websitetoolbox.com/post/show_single_post?pid=1303528828&postcount=4&forum=627911

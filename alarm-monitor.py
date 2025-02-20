@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2018 Joseph Heenan
 # Updates Jul 2020 Charly Anderson
+# Updates 2025 Sjoerd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,8 +35,7 @@ class TexecomMqtt:
 
     @staticmethod
     def on_connect(client, userdata, flags, reason_code, properties):
-        if len(topic_subs[0]) > 0:
-            client.subscribe(topic_root + "/alarm_control_panel/+/command/#")
+        client.subscribe(topic_root + "/alarm_control_panel/+/command/#")
 
     @staticmethod
     def on_message(client, userdata, message):
@@ -47,28 +47,24 @@ class TexecomMqtt:
                 "topic: " + topic + " received message =",
                 str(message.payload.decode("utf-8")),
             )
-        topicbase = topic_root + "/alarm_control_panel/"
-        if len(topic) > len(topicbase):
-            idx = topic.find("/", len(topicbase))
-            if idx >= 0:
-                subtopic = topic[len(topicbase) : idx]
-                if subtopic in topic_subs:
-                    subtopicIdx = topic_subs.index(subtopic)
-                    if len(topic_areamaps) >= subtopicIdx:
-                        areamap = topic_areamaps[subtopicIdx]
-                        area_bitmap = bytes.fromhex(areamap)
-                        if message.payload.decode("utf-8") == "ARM_AWAY": # The Home Assistant command payload text
-                            tc.requestArmAreas(area_bitmap)
-                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_1", "ARM_NIGHT"): # part arm 1, default = ARM_NIGHT
-                            tc.requestPartArm1Areas(area_bitmap)
-                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_2", "ARM_HOME"): # part arm 2, default = ARM_HOME
-                            tc.requestPartArm2Areas(area_bitmap)
-                        elif message.payload.decode("utf-8") == os.getenv("PART_ARM_3", "ARM_VACATION"): # part arm 3, default = ARM_VACATION
-                            tc.requestPartArm3Areas(area_bitmap)
-                        elif message.payload.decode("utf-8") == "DISARM":
-                            tc.requestDisArmAreas(area_bitmap)
-                        elif message.payload.decode("utf-8") == "reset":
-                            tc.requestResetAreas(area_bitmap)
+        if paho.topic_matches_sub(topic_root + "/alarm_control_panel/+/command/#", topic):
+            topic = topic.split('/')
+            areanumber = topic[2]
+            if os.getenv("AREA_" + areanumber + "_ENABLED", False) == "TRUE":
+                areamap = topic_areamaps[int(areanumber)]
+                area_bitmap = bytes.fromhex(areamap)
+                if message.payload.decode("utf-8") == "ARM_AWAY": # The Home Assistant command payload text
+                    tc.requestArmAreas(area_bitmap)
+                elif message.payload.decode("utf-8") == os.getenv("PART_ARM_1", "ARM_NIGHT"): # part arm 1, default = ARM_NIGHT
+                    tc.requestPartArm1Areas(area_bitmap)
+                elif message.payload.decode("utf-8") == os.getenv("PART_ARM_2", "ARM_HOME"): # part arm 2, default = ARM_HOME
+                    tc.requestPartArm2Areas(area_bitmap)
+                elif message.payload.decode("utf-8") == os.getenv("PART_ARM_3", "ARM_VACATION"): # part arm 3, default = ARM_VACATION
+                    tc.requestPartArm3Areas(area_bitmap)
+                elif message.payload.decode("utf-8") == "DISARM":
+                    tc.requestDisArmAreas(area_bitmap)
+                elif message.payload.decode("utf-8") == "reset":
+                    tc.requestResetAreas(area_bitmap)
 
     @staticmethod
     def zone_details_callback(zone, panelType, numberOfZones):
@@ -100,30 +96,32 @@ class TexecomMqtt:
 
     @staticmethod
     def area_details_callback(area, panelType, numberOfZones):
-        name = str.lower((area.text).replace(" ", "_"))
-        topicbase = topic_root + "/alarm_control_panel/" + name
-        configtopic = topicbase + "/config"
-        statetopic = topicbase + "/state"
-        commandtopic = topicbase + "/command"
-        message = {
-            "name": area.text,
-            "state_topic": statetopic,
-            "availability_topic": topic_root + "/alarm_control_panel/availability",
-            "command_topic": commandtopic,
-            "unique_id": ".".join([panelType, "area", name]),
-            "code_arm_required": "false",
-            "code_disarm_required ": "false",
-            "device": {
-                "name": "Texecom " + panelType + " " + str(numberOfZones),
-                "identifiers": "123456789",  # TODO panel serial number?
-                "manufacturer": "Texecom",
-                "model": panelType + " " + str(numberOfZones)
+        if os.getenv("AREA_" + str(area.number) + "_ENABLED", False) == "TRUE":
+            number = str(area.number)
+            name = str.lower((area.text).replace(" ", "_"))
+            topicbase = topic_root + "/alarm_control_panel/" + number
+            configtopic = topicbase + "/config"
+            statetopic = topicbase + "/state"
+            commandtopic = topicbase + "/command"
+            message = {
+                "name": area.text,
+                "state_topic": statetopic,
+                "availability_topic": topic_root + "/alarm_control_panel/availability",
+                "command_topic": commandtopic,
+                "unique_id": ".".join([panelType, "area", name]),
+                "code_arm_required": "false",
+                "code_disarm_required ": "false",
+                "device": {
+                    "name": "Texecom " + panelType + " " + str(numberOfZones),
+                    "identifiers": "123456789",  # TODO panel serial number?
+                    "manufacturer": "Texecom",
+                    "model": panelType + " " + str(numberOfZones)
+                }
             }
-        }
-        if TexecomMqtt.log_mqtt_traffic:
-            print("MQTT Update %s: %s" % (configtopic, json.dumps(message)))
-        client.publish(configtopic, json.dumps(message), retain=True)
-        return area
+            if TexecomMqtt.log_mqtt_traffic:
+                print("MQTT Update %s: %s" % (configtopic, json.dumps(message)))
+            client.publish(configtopic, json.dumps(message), retain=True)
+            return area
 
     @staticmethod
     def zone_status_event(zone):
@@ -139,31 +137,32 @@ class TexecomMqtt:
 
     @staticmethod
     def area_status_event(area):
-        area_state_str = [
-            "disarmed", # the Home Assistant states for a MQTT Alarm control panel. These must match (in order) the actual states in area.py
-            "arming", # in exit
-            "disarming", # in entry
-            "armed_away",
-            "arming", # part arming
-            "triggered",
-            os.getenv("PART_ARM_1", "ARM_NIGHT"), # part armed 1
-            os.getenv("PART_ARM_2", "ARM_HOME"), # part armed 2
-            os.getenv("PART_ARM_3", "ARM_VACATION") # part armed 3
-        ][area.state]
+        if os.getenv("AREA_" + str(area.number) + "_ENABLED", False) == "TRUE":
+            area_state_str = [
+                "disarmed", # the Home Assistant states for a MQTT Alarm control panel. These must match (in order) the actual states in area.py
+                "arming", # in exit
+                "disarming", # in entry
+                "armed_away",
+                "arming", # part arming
+                "triggered",
+                os.getenv("PART_ARM_1", "ARM_NIGHT"), # part armed 1
+                os.getenv("PART_ARM_2", "ARM_HOME"), # part armed 2
+                os.getenv("PART_ARM_3", "ARM_VACATION") # part armed 3
+            ][area.state]
 
-        #replace the syntax for the part arm stings from the config with the correct syntax home assistant expects for the states
-        for old, new in (("ARM_NIGHT", "armed_night"), ("ARM_HOME", "armed_home"), ("ARM_VACATION", "armed_vacation"), ("ARM_CUSTOM_BYPASS", "armed_custom_bypass")):
-            area_state_str = area_state_str.replace(old, new)
+            #replace the syntax for the part arm stings from the config with the correct syntax home assistant expects for the states
+            for old, new in (("ARM_NIGHT", "armed_night"), ("ARM_HOME", "armed_home"), ("ARM_VACATION", "armed_vacation"), ("ARM_CUSTOM_BYPASS", "armed_custom_bypass")):
+                area_state_str = area_state_str.replace(old, new)
 
-        topic = (
-            topic_root
-            + "/alarm_control_panel/"
-            + str.lower((area.text).replace(" ", "_"))
-            + "/state"
-        )
-        if TexecomMqtt.log_mqtt_traffic:
-            print("MQTT Update %s: %s" % (topic, area_state_str))
-        client.publish(topic, area_state_str, retain=True)
+            topic = (
+                topic_root
+                + "/alarm_control_panel/"
+                + str(area.number)
+                + "/state"
+            )
+            if TexecomMqtt.log_mqtt_traffic:
+                print("MQTT Update %s: %s" % (topic, area_state_str))
+            client.publish(topic, area_state_str, retain=True)
 
     @staticmethod
     def alive_event():
@@ -221,15 +220,9 @@ if __name__ == "__main__":
     broker_user = os.getenv("BROKER_USER", None)
     broker_pass = os.getenv("BROKER_PASS", None)
     topic_root = os.getenv("MQTT_ROOT_TOPIC", "homeassistant")
-    # This is the name of your Areas for arm/disarm via mqtt. They are mapped onto the equivlent areamap.
-    # example of MQTT_AREAS and MQTT_AREAMAPS below defines (in order) Area1-4 ('all'), Area1('ground_floor'), Area2('upstairs'), Area3('outside'), Area4('shed')
-    topic_subs = os.getenv(
-        "MQTT_AREAS", "all,ground_floor,upstairs,outside,shed"
-    ).split(",")
-    topic_areamaps = os.getenv(
-        "MQTT_AREAMAPS",
-        "0F000000000000,01000000000000,02000000000000,04000000000000,08000000000000",
-    ).split(",")
+
+    # the first one is all areas, not used anymore
+    topic_areamaps = ["0F000000000000","01000000000000","02000000000000","04000000000000","08000000000000"]
 
     sys.stdout = Unbuffered(sys.stdout)
 

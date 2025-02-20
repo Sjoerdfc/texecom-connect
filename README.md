@@ -1,4 +1,4 @@
-# Texecom Connect for Home Assistant
+# Texecom Connect Protocol Python
 
 ## Introduction
 
@@ -10,8 +10,11 @@ Original work was done by Joseph Heenan, Charly Anderson, davidMbrooke, mpredfea
 - Part Arm 1, 2 and 3 should all work, and it can be configured what state they should be in Home Assistant in the docker compose config.
 - The alarm control panel and zones (binary sensors) should now become unavailable in Home Assistant when the software is not running/crashed/disconnected.
 - The device classes in Home Assistant can be configured for all zones in the docker compose config.
+- Area configuration is easier than before.
 
 ## Requirements
+
+You need a MQTT broker to connect to Home Assistant.
 
 This module connects over TCP to the alarm panel, so a ComIP or SmartCom is needed.
 
@@ -23,9 +26,11 @@ You need to set a UDL password for your panel. If you don't have a UDL password 
 
 ## Using it
 
-Install python and run alarm-monitor.py manually. The configuration options are in this file.
+- Install as a Home Assistant addon. In your Home Assistant, open the Add-On Store, and add `https://github.com/Sjoerdfc/texecom-connect` as a repository in the top right.
 
-Or use this docker-compose file:
+- Install python and run alarm-monitor.py manually. The configuration options are in this file.
+
+- Or use this docker-compose file:
 
 ```yaml
 services:
@@ -35,20 +40,16 @@ services:
     restart: unless-stopped
     environment:
       - TEXHOST=10.0.0.20
-      - TEXTPORT=10001
+      - TEXPORT=10001
       - UDLPASSWORD=1234
       - BROKER_URL=10.0.0.10
       - BROKER_USER=user
       - BROKER_PASS=pass
       - MQTT_ROOT_TOPIC=homeassistant
-      # This is from the original author.
-      # The way I configured this, with only one zone, is set AREAS to 'zonename' (same name as in alarm system),
-      # and set AREAMAPS to 01000000000000 (for Area 1).
-      # So 0F000000000000 = all areas, 01000000000000 = area 1, 02000000000000 = area 2, etc.
-      # So if you have 1 area, you only need 01000000000000 in AREAMAPS, and set 1 name for it in AREAS. As far as I understand.
-      # This works fine for me in Home Assistant.
-      - MQTT_AREAS=all,ground_floor,upstairs,outside,shed
-      - MQTT_AREAMAPS=0F000000000000,01000000000000,02000000000000,04000000000000,08000000000000
+      - AREA_1_ENABLED=TRUE
+      - AREA_2_ENABLED=FALSE
+      - AREA_3_ENABLED=FALSE
+      - AREA_4_ENABLED=FALSE
       # What state Part Arm 1/2/3 should have in Home Assistant. Available states:
       # ARM_HOME, ARM_NIGHT, ARM_VACATION, ARM_CUSTOM_BYPASS. (ARM_AWAY is used for Full Arm)
       - PART_ARM_1=ARM_NIGHT

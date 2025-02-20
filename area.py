@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2018 Joseph Heenan
 # Updates Jul 2020 Charly Anderson
+# Updates 2025 Sjoerd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
