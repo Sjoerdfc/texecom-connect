@@ -1,0 +1,27 @@
+name: "texecom-connect"
+version: "0.5"
+slug: "texecom-connect"
+description: This is a python module that connects Texecom Alarm systems to Home Assistant with MQTT
+url: "https://github.com/Sjoerdfc/texecom-connect/"
+arch:
+  - amd64
+init: false
+options:
+  TEXHOST: "10.0.0.20"
+  TEXPORT: "10001"
+  UDLPASSWORD: "1234"
+  BROKER_URL: "core-mosquitto"
+  BROKER_USER: ""
+  BROKER_PASS: ""
+  MQTT_ROOT_TOPIC: "homeassistant"
+  AREA_1_ENABLED: true
+schema:
+  TEXHOST: "str"
+  TEXPORT: "str"
+  UDLPASSWORD: "str"
+  BROKER_URL: "str"
+  BROKER_USER: "str?"
+  BROKER_PASS: "str?"
+  MQTT_ROOT_TOPIC: "homeassistant"
+  AREA_1_ENABLED: "bool?"
+image: "sjoerdfc/test"
