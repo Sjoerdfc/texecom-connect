@@ -16,10 +16,10 @@ options:
   BROKER_USER: ""
   BROKER_PASS: ""
   MQTT_ROOT_TOPIC: "homeassistant"
-  AREA_1_ENABLED: true
-  AREA_2_ENABLED: false
-  AREA_3_ENABLED: false
-  AREA_4_ENABLED: false
+  AREA_1_ENABLED: "TRUE"
+  AREA_2_ENABLED: "FALSE"
+  AREA_3_ENABLED: "FALSE"
+  AREA_4_ENABLED: "FALSE"
   PART_ARM_1: "ARM_NIGHT"
   PART_ARM_2: "ARM_HOME"
   PART_ARM_3: "ARM_VACATION"
@@ -31,10 +31,10 @@ schema:
   BROKER_USER: "str?"
   BROKER_PASS: "str?"
   MQTT_ROOT_TOPIC: "str"
-  AREA_1_ENABLED: "bool"
-  AREA_2_ENABLED: "bool"
-  AREA_3_ENABLED: "bool"
-  AREA_4_ENABLED: "bool"
+  AREA_1_ENABLED: "str"
+  AREA_2_ENABLED: "str"
+  AREA_3_ENABLED: "str"
+  AREA_4_ENABLED: "str"
   PART_ARM_1: "str?"
   PART_ARM_2: "str?"
   PART_ARM_3: "str?"
