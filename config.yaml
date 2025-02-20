@@ -1,4 +1,4 @@
-name: "texecom-connect"
+name: "Texecom Connect"
 version: "0.5"
 slug: "texecom-connect"
 description: "This is a python module that connects Texecom Alarm systems to Home Assistant with MQTT"
