@@ -2,7 +2,7 @@ name: "texecom-connect"
 version: "0.5"
 slug: "texecom-connect"
 description: This is a python module that connects Texecom Alarm systems to Home Assistant with MQTT
-url: "https://github.com/Sjoerdfc/texecom-connect/"
+url: "https://github.com/Sjoerdfc/texecom-connect/tree/dev/"
 arch:
   - amd64
 init: false
