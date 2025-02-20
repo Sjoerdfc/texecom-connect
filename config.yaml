@@ -1,7 +1,7 @@
 name: "texecom-connect"
 version: "0.5"
 slug: "texecom-connect"
-description: This is a python module that connects Texecom Alarm systems to Home Assistant with MQTT
+description: "This is a python module that connects Texecom Alarm systems to Home Assistant with MQTT"
 url: "https://github.com/Sjoerdfc/texecom-connect/"
 arch:
   - amd64
@@ -22,6 +22,6 @@ schema:
   BROKER_URL: "str"
   BROKER_USER: "str?"
   BROKER_PASS: "str?"
-  MQTT_ROOT_TOPIC: "homeassistant"
+  MQTT_ROOT_TOPIC: "str"
   AREA_1_ENABLED: "bool?"
 image: "sjoerdfc/test"
