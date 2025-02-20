@@ -521,9 +521,13 @@ class TexecomConnect(TexecomDefines):
         for zoneNumber in range(1, self.numberOfZones + 1):
             zone = self.get_zone_details(zoneNumber)
             self.zones[zoneNumber] = zone
-            if zone.zoneType != zone.ZONETYPE_UNUSED:
+            if zone == None:
                 self.highestUsedZone = zoneNumber
                 self.associateZoneWithAreas(zone)
+            else:
+                if zone.zoneType != zone.ZONETYPE_UNUSED:
+                    self.highestUsedZone = zoneNumber
+                    self.associateZoneWithAreas(zone)
 
     def get_all_users(self):
         if self.numberOfUsers is not None:

@@ -1,4 +1,4 @@
-# Texecom Connect Protocol Python
+# Texecom Connect for Home Assistant
 
 ## Introduction
 
