@@ -521,10 +521,7 @@ class TexecomConnect(TexecomDefines):
         for zoneNumber in range(1, self.numberOfZones + 1):
             zone = self.get_zone_details(zoneNumber)
             self.zones[zoneNumber] = zone
-            if zone == None:
-                self.highestUsedZone = zoneNumber
-                self.associateZoneWithAreas(zone)
-            else:
+            if zone is not None:
                 if zone.zoneType != zone.ZONETYPE_UNUSED:
                     self.highestUsedZone = zoneNumber
                     self.associateZoneWithAreas(zone)
@@ -533,8 +530,9 @@ class TexecomConnect(TexecomDefines):
         if self.numberOfUsers is not None:
             for usernumber in range(1, self.numberOfUsers):
                 user = self.get_user(usernumber)
-                if user.valid():
-                    self.users[usernumber] = user
+                if user is not None:
+                    if user.valid():
+                        self.users[usernumber] = user
             user = User()
             user.name = "Engineer"
             self.users[0] = user
