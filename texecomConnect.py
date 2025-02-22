@@ -54,6 +54,7 @@ class TexecomConnect(TexecomDefines):
         self.panelType = None
         self.firmwareVersion = None
         self.alive_event_func = None
+        self.disconnect_event_func = None
         self.login_event_func = None
         self.area_event_func = None
         self.area_details_func = None
@@ -647,6 +648,9 @@ class TexecomConnect(TexecomDefines):
     def on_alive_event(self, alive_event_func):
         self.alive_event_func = alive_event_func
 
+    def on_disconnect_event(self, disconnect_event_func):
+        self.disconnect_event_func = disconnect_event_func
+
     def on_login_event(self, login_event_func):
         self.login_event_func = login_event_func
 
@@ -885,7 +889,6 @@ class TexecomConnect(TexecomDefines):
             connected = True
             if notifiedConnectionLoss:
                 self.log("Connection regained - calling send-message.sh")
-                os.system("./send-message.sh 'connection regained'")
             self.get_number_zones()
             self.get_date_time()
             self.get_system_power()
@@ -920,6 +923,7 @@ class TexecomConnect(TexecomDefines):
 
     def closesocket(self):
         if self.s is not None:
+            self.disconnect_event_func()
             try:
                 self.s.shutdown(socket.SHUT_RDWR)
             except socket.error:
@@ -955,6 +959,7 @@ class TexecomConnect(TexecomDefines):
                 if result is None:
                     self.log("idle command failed; closing socket")
                     self.closesocket()
+
                     return None
             if time.time() - self.time_last_heartbeat > self.alive_heartbeat_secs:
                 self.alive()

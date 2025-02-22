@@ -170,8 +170,16 @@ class TexecomMqtt:
             client.publish(topic, area_state_str, retain=True)
 
     @staticmethod
-    def alive_event():
+    def login_event():
         available = "online"
+        topic = topic_root + "/alarm_control_panel/availability"
+        if TexecomMqtt.log_mqtt_traffic:
+            print("MQTT Update %s: %s" % (topic, available))
+        client.publish(topic, available, retain=True)
+
+    @staticmethod
+    def disconnect_event():
+        available = "offline"
         topic = topic_root + "/alarm_control_panel/availability"
         if TexecomMqtt.log_mqtt_traffic:
             print("MQTT Update %s: %s" % (topic, available))
@@ -243,7 +251,8 @@ if __name__ == "__main__":
     tc = TexecomConnect(texhost, texport, udlpassword, TexecomMqtt.debug_mode)
     tc.enable_output_events(False)
     #tc.on_alive_event(TexecomMqtt.alive_event)
-    tc.on_login_event(TexecomMqtt.alive_event)
+    tc.on_login_event(TexecomMqtt.login_event)
+    tc.on_disconnect_event(TexecomMqtt.disconnect_event)
     tc.on_area_event(TexecomMqtt.area_status_event)
     tc.on_zone_event(TexecomMqtt.zone_status_event)
     tc.on_area_details(TexecomMqtt.area_details_callback)
