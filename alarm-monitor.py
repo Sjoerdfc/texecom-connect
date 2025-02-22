@@ -31,7 +31,12 @@ import paho.mqtt.client as paho
 
 class TexecomMqtt:
 
-    log_mqtt_traffic = False
+    if os.getenv("DEBUG") == "TRUE":
+        debug_mode = True
+    else:
+        debug_mode = False
+
+    log_mqtt_traffic = debug_mode
 
     @staticmethod
     def on_connect(client, userdata, flags, reason_code, properties):
@@ -235,7 +240,7 @@ if __name__ == "__main__":
     client.connect(broker_url, broker_port)
     client.loop_start()
 
-    tc = TexecomConnect(texhost, texport, udlpassword)
+    tc = TexecomConnect(texhost, texport, udlpassword, TexecomMqtt.debug_mode)
     tc.enable_output_events(False)
     #tc.on_alive_event(TexecomMqtt.alive_event)
     tc.on_login_event(TexecomMqtt.alive_event)

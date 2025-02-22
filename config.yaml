@@ -1,5 +1,5 @@
 name: "Texecom Connect"
-version: "0.6.2"
+version: "0.6.3"
 slug: "texecom-connect"
 description: "This is a python module that connects Texecom Alarm systems to Home Assistant with MQTT"
 url: "https://github.com/Sjoerdfc/texecom-connect/"
@@ -54,4 +54,5 @@ schema:
   ZONE_14_CLASS: "str?"
   ZONE_15_CLASS: "str?"
   ZONE_16_CLASS: "str?"
+  DEBUG: "str?"
 image: "sjoerdfc/texecom-connect-ha-{arch}"

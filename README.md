@@ -60,6 +60,7 @@ services:
       - ZONE_2_CLASS=door
       - ZONE_3_CLASS=motion
       # etc..
+      - DEBUG=FALSE
 ```
 
 ## License

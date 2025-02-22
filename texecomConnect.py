@@ -36,15 +36,15 @@ from texecomDefines import TexecomDefines
 
 
 class TexecomConnect(TexecomDefines):
-    def __init__(self, host, port, udl_password):
+    def __init__(self, host, port, udl_password, debug_mode):
         self.host = host
         self.port = port
         self.udlpassword = udl_password.encode("ascii")
         self.crc8_func = crcmod.mkCrcFun(poly=0x185, rev=False, initCrc=0xFF)
         self.nextseq = 0
 
-        self.print_network_traffic = False
-        self.log_verbose = False
+        self.print_network_traffic = debug_mode
+        self.log_verbose = debug_mode
         self.alive_heartbeat_secs = 300
         self.time_last_heartbeat = 0
         self.last_command_time = 0
