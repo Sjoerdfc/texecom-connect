@@ -78,6 +78,7 @@ class TexecomConnect(TexecomDefines):
         self.lastIdleCommand = 0
         # Set to true if the idle loop should reread the site data
         self.siteDataChanged = False
+        self.idleFailCount = 0
 
     ## texecom commands
     # in order of their command number
@@ -176,6 +177,7 @@ class TexecomConnect(TexecomDefines):
             return False
         if response == self.CMD_RESPONSE_NAK:
             self.log("NAK response from panel for ARMAREAS")
+            self.closesocket()
             return False
         elif response != self.CMD_RESPONSE_ACK:
             self.log(
@@ -696,19 +698,6 @@ class TexecomConnect(TexecomDefines):
         """Queue reset areas request. Request is queued for processing by main thread"""
         self.arm_disarm_reset_queue.append((self.CMD_RESETAREAS, None, area_bitmap))
 
-# this does not seem to be used anywhere
-#    def set_area_state(self, area, area_state):
-#        area.state = area_state
-#        area.state_text = [
-#            "disarmed",
-#            "in exit",
-#            "in entry",
-#            "armed",
-#            "part armed",
-#            "in alarm",
-#            "part armed 1",
-#        ][area.state]
-
     def handle_event_message(self, payload):
         msg_type, payload = payload[0:1], payload[1:]
         if msg_type == self.MSG_DEBUG:
@@ -945,22 +934,26 @@ class TexecomConnect(TexecomDefines):
                 request = self.arm_disarm_reset_queue.pop(0)
                 self.arm_disarm_reset_area(request[0], request[1], request[2])
             elif time_since_last_command > 30:
-                # get_changed_zones_state and get_armed_area_state to protect against any lost event messages for zone/area status
+                # get_changed_zones_state to protect against any lost event messages for zone status
                 # and to reset the panel's 60 second timeout
                 # this ends up recursively calling recvresponse; however as our retry * timeout (3 * 2 == 6) is
                 # far less than the 30 seconds between idle commands that won't be an issue
-                if self.lastIdleCommand == 0:
-                    result = self.get_changed_zones_state()
-                else:
-                    result = self.get_armed_area_state()
-                self.lastIdleCommand += 1
-                if self.lastIdleCommand == 2:
-                    self.lastIdleCommand = 0
+                # 2025: this might become an issue with the retrying I added
+                result = self.get_changed_zones_state()
                 if result is None:
-                    self.log("idle command failed; closing socket")
-                    self.closesocket()
+                    if self.idleFailCount > 1:
+                        self.log("idle command failed; closing socket")
+                        self.idleFailCount = 0
+                        self.closesocket()
 
-                    return None
+                        return None
+                    # retry again later
+                    self.log("idle command failed; retrying later")
+                    self.last_command_time = 10
+                    self.idleFailCount = self.idleFailCount + 1
+                else:
+                    self.idleFailCount = 0
+
             if time.time() - self.time_last_heartbeat > self.alive_heartbeat_secs:
                 self.alive()
             header = self.s.recv(self.LENGTH_HEADER)
@@ -982,16 +975,13 @@ class TexecomConnect(TexecomDefines):
                 self.closesocket()
                 return None
             if len(header) < self.LENGTH_HEADER:
-                # fix if data isn't in 1 packet
-                #header += self.s.recv(self.LENGTH_HEADER - len(header))
-                if len(header) < self.LENGTH_HEADER:
-                    self.log(
-                        "Header received from panel is too short, only {:d} bytes, ignoring - contents:".format(
-                            len(header)
-                        )
+                self.log(
+                    "Header received from panel is too short, only {:d} bytes, ignoring - contents:".format(
+                        len(header)
                     )
-                    hexdump.hexdump(header)
-                    continue
+                )
+                hexdump.hexdump(header)
+                continue
             msg_start, msg_type, msg_length, msg_sequence = (
                 header[0:1],
                 header[1:2],
@@ -1003,18 +993,6 @@ class TexecomConnect(TexecomDefines):
                 hexdump.hexdump(header)
                 return None
             expected_len = msg_length - self.LENGTH_HEADER
-            #received_len = 0
-            #payload = bytearray()
-            #while received_len < expected_len:
-            #    curr_payload = self.s.recv(expected_len)
-            #    if self.print_network_traffic:
-            #        self.log("Received message payload:")
-            #        hexdump.hexdump(curr_payload)
-            #    payload += curr_payload
-            #    received_len += len(curr_payload)
-            #    if (len(curr_payload) == 0):
-            #        self.log("no more data")
-            #        break
 
             payload = self.s.recv(expected_len)
             if self.print_network_traffic:
@@ -1093,6 +1071,7 @@ class TexecomConnect(TexecomDefines):
             retries -= 1
             try:
                 response = self.recvresponse()
+                self.idleFailCount = 0
                 break
             except socket.timeout:
                 # NB: sequence number will be the same as last attempt

@@ -9,7 +9,7 @@ Original work was done by Joseph Heenan, Charly Anderson, davidMbrooke, mpredfea
 - Arming and disarming should work.
 - Part Arm 1, 2 and 3 should all work, and it can be configured what state they should be in Home Assistant in the docker compose config.
 - The alarm control panel and zones (binary sensors) should now become unavailable in Home Assistant when the software is not running/crashed/disconnected.
-- The device classes in Home Assistant can be configured for all zones in the docker compose config.
+- The device classes in Home Assistant can be configured for all zones.
 - Area configuration is easier than before.
 
 ## Requirements
