@@ -126,6 +126,30 @@ class TexecomMqtt:
             if TexecomMqtt.log_mqtt_traffic:
                 print("MQTT Update %s: %s" % (configtopic, json.dumps(message)))
             client.publish(configtopic, json.dumps(message), retain=True)
+
+            # add a tamper alarm binary sensor
+            topicbase = topic_root + "/binary_sensor/tamper"
+            configtopic = topicbase + "/config"
+            statetopic = topicbase + "/state"
+            message = {
+                "name": "Tamper",
+                "device_class": "tamper",
+                "state_topic": statetopic,
+                "availability_topic": topic_root + "/alarm_control_panel/availability",
+                "payload_on": "True",
+                "payload_off": "False",
+                "unique_id": ".".join([panelType, 'tamper']),
+                "device": {
+                    "name": "Texecom " + panelType + " " + str(numberOfZones),
+                    "identifiers": "123456789",  # TODO panel serial number?
+                    "manufacturer": "Texecom",
+                    "model": panelType + " " + str(numberOfZones)
+                }
+            }
+            if TexecomMqtt.log_mqtt_traffic:
+                print("MQTT Update %s: %s" % (configtopic, json.dumps(message)))
+            client.publish(configtopic, json.dumps(message), retain=True)
+
             return area
 
     @staticmethod
@@ -168,6 +192,19 @@ class TexecomMqtt:
             if TexecomMqtt.log_mqtt_traffic:
                 print("MQTT Update %s: %s" % (topic, area_state_str))
             client.publish(topic, area_state_str, retain=True)
+
+    @staticmethod
+    def tamper_event(tamper):
+        topic = (
+            topic_root
+            + "/binary_sensor/tamper/state"
+        )
+        if tamper:
+            client.publish(topic, 'triggered', retain=True)
+        else:
+            client.publish(topic, 'disarmed', retain=True)
+
+
 
     @staticmethod
     def login_event():
@@ -255,6 +292,7 @@ if __name__ == "__main__":
     tc.on_disconnect_event(TexecomMqtt.disconnect_event)
     tc.on_area_event(TexecomMqtt.area_status_event)
     tc.on_zone_event(TexecomMqtt.zone_status_event)
+    tc.on_tamper_event(TexecomMqtt.tamper_event)
     tc.on_area_details(TexecomMqtt.area_details_callback)
     tc.on_zone_details(TexecomMqtt.zone_details_callback)
     tc.on_log_event(TexecomMqtt.log_event)

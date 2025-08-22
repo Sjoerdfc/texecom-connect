@@ -57,6 +57,7 @@ class TexecomConnect(TexecomDefines):
         self.disconnect_event_func = None
         self.login_event_func = None
         self.area_event_func = None
+        self.tamper_event_func = None
         self.area_details_func = None
         self.zone_details_func = None
         self.zone_event_func = None
@@ -656,6 +657,9 @@ class TexecomConnect(TexecomDefines):
     def on_login_event(self, login_event_func):
         self.login_event_func = login_event_func
 
+    def on_tamper_event(self, tamper_event_func):
+        self.tamper_event_func = tamper_event_func
+
     def on_area_event(self, area_event_func):
         self.area_event_func = area_event_func
 
@@ -825,6 +829,15 @@ class TexecomConnect(TexecomDefines):
             if communicated:
                 group_type_str += " [communicated]"
 
+            # tamper event and tamper restore event
+            if group_type == 11:
+                if self.tamper_event_func is not None:
+                    self.tamper_event_func(True)
+            elif group_type == 12:
+                if self.tamper_event_func is not None:
+                    pass
+                    #self.tamper_event_func(False)
+
             return "Log event message: {} {}, {} parameter: {:d} areas: {:d}".format(
                 timestamp_str, event_str, group_type_str, parameter, areas
             )
@@ -953,6 +966,8 @@ class TexecomConnect(TexecomDefines):
                     self.idleFailCount = self.idleFailCount + 1
                 else:
                     self.idleFailCount = 0
+                    if self.login_event_func is not None:
+                        self.login_event_func()
 
             if time.time() - self.time_last_heartbeat > self.alive_heartbeat_secs:
                 self.alive()

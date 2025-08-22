@@ -49,7 +49,7 @@ class TexecomDefines:
     # panel fails to respond to a command (as it sometimes does it it
     # sends an event at the same time we send a command) it will take
     # longer for us to realise and resend the command
-    CMD_TIMEOUT = 2
+    CMD_TIMEOUT = 3
     CMD_RETRIES = 3
 
     CMD_RESPONSE_ACK = b'\x06'
