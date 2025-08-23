@@ -34,6 +34,8 @@ In Home Assistant, open the Add-On Store, and add `https://github.com/Sjoerdfc/t
 See the docker compose file below for more information about the configuration options.
 
 ### Docker
+Available as a docker at: https://hub.docker.com/r/sjoerdfc/texecom-connect
+
 Docker Compose file:
 
 ```yaml
