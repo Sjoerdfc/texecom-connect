@@ -422,18 +422,19 @@ class TexecomConnect(TexecomDefines):
         details = self.sendcommand(self.CMD_GETZONECHANGES, None)
         if details is None:
             return None
-        if len(details) == self.zoneBitmapSize:
+        #if len(details) == self.zoneBitmapSize:
+        else:
             changedZonesBitmap = details
             return changedZonesBitmap
-        else:
-            self.log(
-                "GETAREAFLAGS: response wrong length: {:d}/{:d} ".format(
-                    len(details), self.zoneBitmapSize
-                )
-            )
-            self.log("Payload: ")
-            hexdump.hexdump(details)
-            return None
+        #else:
+        #    self.log(
+        #        "GETAREAFLAGS: response wrong length: {:d}/{:d} ".format(
+        #            len(details), self.zoneBitmapSize
+        #        )
+        #    )
+        #    self.log("Payload: ")
+        #    hexdump.hexdump(details)
+        #    return None
 
     def set_event_messages(self):
         """CMD_SETEVENTMESSAGES"""
