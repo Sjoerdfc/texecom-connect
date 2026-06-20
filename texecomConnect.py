@@ -433,7 +433,8 @@ class TexecomConnect(TexecomDefines):
             )
             self.log("Payload: ")
             hexdump.hexdump(details)
-            return False
+            self.closesocket()
+            return None
 
     def set_event_messages(self):
         """CMD_SETEVENTMESSAGES"""
@@ -560,8 +561,6 @@ class TexecomConnect(TexecomDefines):
         changedZonesBitmap = self.get_zone_changes()
         if changedZonesBitmap is None:
             return None
-        elif changedZonesBitmap is False:
-            return False
         flags = int.from_bytes(changedZonesBitmap, "little")
         zoneNum = 1
         while zoneNum <= self.highestUsedZone:
@@ -956,7 +955,7 @@ class TexecomConnect(TexecomDefines):
                 # 2025: this might become an issue with the retrying I added
                 result = self.get_changed_zones_state()
                 if result is None:
-                    if self.idleFailCount > 1:
+                    if self.idleFailCount > 2:
                         self.log("idle command failed; closing socket")
                         self.idleFailCount = 0
                         self.closesocket()
@@ -1088,7 +1087,6 @@ class TexecomConnect(TexecomDefines):
             retries -= 1
             try:
                 response = self.recvresponse()
-                self.idleFailCount = 0
                 break
             except socket.timeout:
                 # NB: sequence number will be the same as last attempt
