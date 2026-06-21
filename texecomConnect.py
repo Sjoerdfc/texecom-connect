@@ -427,7 +427,7 @@ class TexecomConnect(TexecomDefines):
             return changedZonesBitmap
         else:
             self.log(
-                "GETAREAFLAGS: response wrong length: {:d}/{:d} ".format(
+                "GETZONECHANGES: response wrong length: {:d}/{:d} ".format(
                     len(details), self.zoneBitmapSize
                 )
             )
