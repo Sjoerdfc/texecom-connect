@@ -425,6 +425,13 @@ class TexecomConnect(TexecomDefines):
         if len(details) == self.zoneBitmapSize:
             changedZonesBitmap = details
             return changedZonesBitmap
+        elif details == self.CMD_RESPONSE_NAK:
+            self.log("GETZONECHANGES: received NAK payload")
+            # in a newer firmware version than the one I have (Sjoerd, 21062026), the zonechange command sometimes returns a NAK,
+            # and the panel stops responding to everything.
+            # Trying to send a different idle command when this happens, maybe this will work and gets the communication with the panel back.
+            self.lastIdleCommand = 1
+            return None
         else:
             self.log(
                 "GETZONECHANGES: response wrong length: {:d}/{:d} ".format(
@@ -433,7 +440,7 @@ class TexecomConnect(TexecomDefines):
             )
             self.log("Payload: ")
             hexdump.hexdump(details)
-            self.closesocket()
+            # self.closesocket() # see the fix above
             return None
 
     def set_event_messages(self):
@@ -953,7 +960,11 @@ class TexecomConnect(TexecomDefines):
                 # this ends up recursively calling recvresponse; however as our retry * timeout (3 * 2 == 6) is
                 # far less than the 30 seconds between idle commands that won't be an issue
                 # 2025: this might become an issue with the retrying I added
-                result = self.get_changed_zones_state()
+                if self.lastIdleCommand == 0:
+                    result = self.get_changed_zones_state()
+                else:
+                    self.lastIdleCommand = 0
+                    result = self.get_armed_area_state()
                 if result is None:
                     if self.idleFailCount > 2:
                         self.log("idle command failed; closing socket")
