@@ -440,7 +440,7 @@ class TexecomConnect(TexecomDefines):
             )
             self.log("Payload: ")
             hexdump.hexdump(details)
-            # self.closesocket() # see the fix above
+            self.closesocket() # disconnect and restart connection, the connection sometimes hangs when wrong length was received
             return None
 
     def set_event_messages(self):
@@ -963,7 +963,6 @@ class TexecomConnect(TexecomDefines):
                 if self.lastIdleCommand == 0:
                     result = self.get_changed_zones_state()
                 else:
-                    self.lastIdleCommand = 0
                     result = self.get_armed_area_state()
                 if result is None:
                     if self.idleFailCount > 2:
@@ -978,6 +977,7 @@ class TexecomConnect(TexecomDefines):
                     self.idleFailCount = self.idleFailCount + 1
                 else:
                     self.idleFailCount = 0
+                    self.lastIdleCommand = 0
                     if self.login_event_func is not None:
                         self.login_event_func()
 
